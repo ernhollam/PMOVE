@@ -1,15 +1,24 @@
 package com.parkit.parkingsystem.model;
 
-import java.util.Calendar;
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Ticket {
     private int id;
     private ParkingSpot parkingSpot;
     private String vehicleRegNumber;
-    private double price;
+    private BigDecimal price;
     private Date inTime;
     private Date outTime;
+    private boolean isRecurring;
+
+    public void setRecurring(boolean recurring) {
+        this.isRecurring = recurring;
+    }
+
+    public boolean getRecurring() {
+        return isRecurring;
+    }
 
     public int getId() {
         return id;
@@ -35,11 +44,11 @@ public class Ticket {
         this.vehicleRegNumber = vehicleRegNumber;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

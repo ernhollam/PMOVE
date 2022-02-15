@@ -3,6 +3,9 @@ package com.parkit.parkingsystem.service;
 import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.model.Ticket;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class FareCalculatorService {
 
     public void calculateFare(Ticket ticket){
@@ -13,25 +16,33 @@ public class FareCalculatorService {
         double inHour = ticket.getInTime().getTime(); // in ms
         double outHour = ticket.getOutTime().getTime();
 
-
         double durationHour = (outHour - inHour)/3600000;// from milliseconds to hours
 
         if (durationHour<=0.5) {//Check if duration is less than 30 min
-            ticket.setPrice(0);
+            ticket.setPrice(BigDecimal.ZERO);
         }
         else{
+            double tmpPrice;
             switch (ticket.getParkingSpot().getParkingType()) {
                 case CAR: {
-                    ticket.setPrice(durationHour * Fare.CAR_RATE_PER_HOUR);
+                    tmpPrice = durationHour * Fare.CAR_RATE_PER_HOUR;
                     break;
                 }
                 case BIKE: {
-                    ticket.setPrice(durationHour * Fare.BIKE_RATE_PER_HOUR);
+                    tmpPrice = durationHour * Fare.BIKE_RATE_PER_HOUR;
                     break;
                 }
                 default:
                     throw new IllegalArgumentException("Unknown Parking Type");
             }
+
+            if (ticket.getRecurring()) {
+                tmpPrice = tmpPrice * (1 - Fare.RECURRING_USER_DISCOUNT);
+            }
+
+            BigDecimal price = new BigDecimal(Double.toString(tmpPrice)).setScale(Fare.SCALE, RoundingMode.HALF_UP);
+            ticket.setPrice(price);
         }
     }
+
 }
