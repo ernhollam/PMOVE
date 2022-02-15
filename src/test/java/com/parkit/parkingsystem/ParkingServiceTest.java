@@ -107,10 +107,8 @@ public class ParkingServiceTest {
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
         //WHEN
-        ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
         assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
         //THEN
-        assertThat(parkingSpot).isNull();
         verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(any(ParkingType.class));
     }
 
@@ -119,11 +117,8 @@ public class ParkingServiceTest {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(3);
         //WHEN
-        //ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
         assertThrows(IllegalArgumentException.class, () -> parkingService.getNextParkingNumberIfAvailable());
         //THEN
-        //assertThat(parkingSpot).isNull();
-        verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(any(ParkingType.class));
     }
 
     @Test
