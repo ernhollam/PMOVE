@@ -8,7 +8,6 @@ import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -72,5 +71,71 @@ public class ParkingServiceTest {
         parkingService.checkIfRecurring(ticket);
         //THEN: isRecurring must be true
         assertThat(ticket.getRecurring()).isTrue();
+    }
+
+    @Test
+    public void getNextParkingNumberIfAvailableWhenAvailableForCar(){
+        //GIVEN
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(2);
+        //WHEN
+        ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+        //THEN
+        assertThat(parkingSpot.getParkingType()).isEqualTo(ParkingType.CAR);
+        assertThat(parkingSpot.isAvailable()).isTrue();
+        assertThat(parkingSpot.getId()).isEqualTo(2);
+
+    }
+
+    @Test
+    public void getNextParkingNumberIfAvailableWhenAvailableForBike(){
+        //GIVEN
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(4);
+        //WHEN
+        ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+        //THEN
+        assertThat(parkingSpot.getParkingType()).isEqualTo(ParkingType.BIKE);
+        assertThat(parkingSpot.isAvailable()).isTrue();
+        assertThat(parkingSpot.getId()).isEqualTo(4);
+
+    }
+
+    @Test
+    public void getNextParkingNumberIfAvailableWhenNotAvailable(){
+        //GIVEN
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
+        //WHEN
+        ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+        assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
+        //THEN
+        assertThat(parkingSpot).isNull();
+        verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(any(ParkingType.class));
+    }
+
+    @Test
+    public void getNextParkingNumberIfAvailableWithWrongVehicleType(){
+        //GIVEN
+        when(inputReaderUtil.readSelection()).thenReturn(3);
+        //WHEN
+        //ParkingSpot parkingSpot = parkingService.getNextParkingNumberIfAvailable();
+        assertThrows(IllegalArgumentException.class, () -> parkingService.getNextParkingNumberIfAvailable());
+        //THEN
+        //assertThat(parkingSpot).isNull();
+        verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(any(ParkingType.class));
+    }
+
+    @Test
+    public void processIncomingCarTest() throws Exception {
+        //GIVEN: a car enters the parking
+        when(inputReaderUtil.readSelection()).thenReturn(1);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(2);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
+        //WHEN: processing this car
+        parkingService.processIncomingVehicle();
+        //THEN: There must be one call to ParkingSpotDAO and one call to TicketDAO
+        verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+        verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
     }
 }
