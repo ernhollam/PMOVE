@@ -16,7 +16,7 @@ public class Ticket {
         this.isRecurring = recurring;
     }
 
-    public boolean getRecurring() {
+    public boolean isRecurring() {
         return isRecurring;
     }
 

@@ -8,6 +8,7 @@ import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Date;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,6 +61,26 @@ public class ParkingServiceTest {
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
+    @Test
+    public void processExitingVehicleWhenTicketNotUpToDate(){
+        //GIVEN
+        when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
+        //WHEN
+        parkingService.processExitingVehicle();
+        //THEN
+        verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+    }
+
+    @Test
+    public void processExitingVehicleWithNoVehicleRegistrationNumber() throws Exception {
+        //GIVEN
+        Ticket ticket = new Ticket();
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(null);
+        //WHEN
+        parkingService.processExitingVehicle();
+        //THEN
+        assertThat(ticket.getOutTime()).isNull();
+    }
 
     @Test
     public void checkIfRecurringUserIsDetectedWhenUserIsRecurring(){
@@ -68,7 +90,7 @@ public class ParkingServiceTest {
         //WHEN:
         parkingService.checkIfRecurring(ticket);
         //THEN: isRecurring must be true
-        assertThat(ticket.getRecurring()).isTrue();
+        assertThat(ticket.isRecurring()).isTrue();
     }
 
     @Test
@@ -80,7 +102,7 @@ public class ParkingServiceTest {
         //WHEN: checking if the incoming vehicle is recurring
         parkingService.checkIfRecurring(ticket);
         //THEN: isRecurring must be false
-        assertThat(ticket.getRecurring()).isFalse();
+        assertThat(ticket.isRecurring()).isFalse();
     }
 
 
@@ -128,10 +150,19 @@ public class ParkingServiceTest {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(3);
         //WHEN
-        //assertThrows(IllegalArgumentException.class, () -> parkingService.getNextParkingNumberIfAvailable());
         assertThat(parkingService.getNextParkingNumberIfAvailable()).isNull();
         //THEN
     }
+
+//    @Test
+//    public void getNextParkingNumberIfAvailableWithNegativeParkingSpotId(){
+//        //GIVEN
+//        Ticket ticket = new Ticket();
+//        //WHEN
+//        //assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
+//        //THEN
+//        assertThat(ticket.getParkingSpot().getId()).isEqualTo(-1); // check that ParkingSpot is null
+//    }
 
     @Test
     public void processIncomingCarTest() throws Exception {
@@ -145,4 +176,19 @@ public class ParkingServiceTest {
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
         verify(ticketDAO, Mockito.times(1)).saveTicket(any(Ticket.class));
     }
+
+    @Test
+    @Disabled
+    void processIncomingBikeWithExceptionThrown() throws Exception {
+        //GIVEN
+        when(inputReaderUtil.readSelection()).thenReturn(2);
+        when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(4);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("\n");
+        //when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(false);
+        //WHEN
+        parkingService.processIncomingVehicle();
+        //THEN
+        //verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+    }
+
 }

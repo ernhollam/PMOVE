@@ -36,7 +36,7 @@ public class FareCalculatorService {
                     throw new IllegalArgumentException("Unknown Parking Type");
             }
 
-            if (ticket.getRecurring()) {
+            if (ticket.isRecurring()) {
                 tmpPrice = tmpPrice * (1 - Fare.RECURRING_USER_DISCOUNT);
             }
 
