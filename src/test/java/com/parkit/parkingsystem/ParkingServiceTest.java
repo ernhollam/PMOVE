@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Date;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +41,7 @@ public class ParkingServiceTest {
             ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
-            lenient().when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+            lenient().when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
             lenient().when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
 
             lenient().when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(true);
@@ -62,16 +61,28 @@ public class ParkingServiceTest {
 
 
     @Test
-    public void checkIfRecurringTest(){
+    public void checkIfRecurringUserIsDetectedWhenUserIsRecurring(){
         //GIVEN: a recurring vehicle entering the parking
         Ticket ticket = new Ticket();
         ticket.setVehicleRegNumber("ABCDEF");
-        ticketDAO.updateTicket(ticket);
         //WHEN:
         parkingService.checkIfRecurring(ticket);
         //THEN: isRecurring must be true
         assertThat(ticket.getRecurring()).isTrue();
     }
+
+    @Test
+    public void checkIfRecurringUserIsDetectedWhenUserIsNotRecurring(){
+        //GIVEN: a vehicle unknown to the DB enters the parking
+        Ticket ticket = new Ticket();
+        ticket.setVehicleRegNumber("GHIJKL");
+        when(ticketDAO.getTicket("GHIJKL")).thenReturn(null);
+        //WHEN: checking if the incoming vehicle is recurring
+        parkingService.checkIfRecurring(ticket);
+        //THEN: isRecurring must be false
+        assertThat(ticket.getRecurring()).isFalse();
+    }
+
 
     @Test
     public void getNextParkingNumberIfAvailableWhenAvailableForCar(){
@@ -107,9 +118,9 @@ public class ParkingServiceTest {
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
         //WHEN
-        assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
+        //assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
         //THEN
-        verify(parkingSpotDAO, Mockito.times(1)).getNextAvailableSlot(any(ParkingType.class));
+        assertThat(parkingService.getNextParkingNumberIfAvailable()).isNull(); // check that ParkingSpot is null
     }
 
     @Test
@@ -117,7 +128,8 @@ public class ParkingServiceTest {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(3);
         //WHEN
-        assertThrows(IllegalArgumentException.class, () -> parkingService.getNextParkingNumberIfAvailable());
+        //assertThrows(IllegalArgumentException.class, () -> parkingService.getNextParkingNumberIfAvailable());
+        assertThat(parkingService.getNextParkingNumberIfAvailable()).isNull();
         //THEN
     }
 

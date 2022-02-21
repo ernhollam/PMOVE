@@ -106,7 +106,7 @@
                 </dependencies>
                 <configuration>
                     <excludes>
-                        <exclude>**/*IT.java</exclude>
+                        <exclude>**/*IntTest.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -121,7 +121,7 @@
                                 <exclude>none</exclude>
                             </excludes>
                             <includes>
-                                <include>**/*IT.java</include>
+                                <include>**/*IntTest.java</include>
                             </includes>
                         </configuration>
                     </execution>
