@@ -55,7 +55,7 @@ public class ParkingServiceIntTest {
     }
 
     @Test
-    public void testParkingACar(){
+    public void testParkingACar() throws Exception {
         //GIVEN
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         //WHEN
@@ -67,7 +67,7 @@ public class ParkingServiceIntTest {
     }
 
     @Test
-    public void testParkingLotExit(){
+    public void testParkingLotExit() throws Exception {
         //GIVEN
         //testParkingACar();
         ParkingService parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);

@@ -8,20 +8,20 @@ import java.math.RoundingMode;
 
 public class FareCalculatorService {
 
-    public void calculateFare(Ticket ticket){
-        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
-            throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
+    public void calculateFare(Ticket ticket) {
+        if ((ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime()))) {
+            throw new IllegalArgumentException("Out time provided is incorrect:" + ticket.getOutTime().toString());
         }
 
-        double inHour = ticket.getInTime().getTime(); // in ms
+        double inHour  = ticket.getInTime().getTime(); // in ms
         double outHour = ticket.getOutTime().getTime();
 
-        double durationHour = (outHour - inHour)/3600000;// from milliseconds to hours
+        double durationHour = (outHour - inHour) / 3600000;// from milliseconds to hours
 
-        if (durationHour<=0.5) {//Check if duration is less than 30 min
+        if (durationHour <= 0.5) {//Check if duration is less than 30 min
             ticket.setPrice(BigDecimal.ZERO);
         }
-        else{
+        else {
             double tmpPrice;
             switch (ticket.getParkingSpot().getParkingType()) {
                 case CAR: {
@@ -44,5 +44,4 @@ public class FareCalculatorService {
             ticket.setPrice(price);
         }
     }
-
 }

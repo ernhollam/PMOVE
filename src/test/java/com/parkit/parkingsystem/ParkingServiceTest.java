@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Date;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -148,21 +149,12 @@ public class ParkingServiceTest {
     @Test
     public void getNextParkingNumberIfAvailableWithWrongVehicleType(){
         //GIVEN
-        when(inputReaderUtil.readSelection()).thenReturn(3);
+        when(inputReaderUtil.readSelection()).thenReturn(100);
         //WHEN
         assertThat(parkingService.getNextParkingNumberIfAvailable()).isNull();
         //THEN
     }
 
-//    @Test
-//    public void getNextParkingNumberIfAvailableWithNegativeParkingSpotId(){
-//        //GIVEN
-//        Ticket ticket = new Ticket();
-//        //WHEN
-//        //assertThrows(Exception.class, () -> parkingService.getNextParkingNumberIfAvailable());
-//        //THEN
-//        assertThat(ticket.getParkingSpot().getId()).isEqualTo(-1); // check that ParkingSpot is null
-//    }
 
     @Test
     public void processIncomingCarTest() throws Exception {
@@ -178,17 +170,15 @@ public class ParkingServiceTest {
     }
 
     @Test
-    @Disabled
     void processIncomingBikeWithExceptionThrown() throws Exception {
-        //GIVEN
+        //GIVEN a bike with no registration number incoming the parking
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(4);
-        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("\n");
-        //when(parkingSpotDAO.updateParking(any(ParkingSpot.class))).thenReturn(false);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(Exception.class);
         //WHEN
-        parkingService.processIncomingVehicle();
+
         //THEN
-        //verify(parkingSpotDAO, Mockito.times(0)).updateParking(any(ParkingSpot.class));
+        assertThatExceptionOfType(Exception.class).isThrownBy(() -> parkingService.processIncomingVehicle());
     }
 
 }
