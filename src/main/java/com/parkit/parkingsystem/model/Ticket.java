@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public class Ticket {
-    private int id;
+    private int         id;
     private ParkingSpot parkingSpot;
-    private String vehicleRegNumber;
-    private BigDecimal price;
-    private Date inTime;
-    private Date outTime;
-    private boolean isRecurring;
+    private String      vehicleRegNumber;
+    private BigDecimal  price;
+    private Date        inTime;
+    private Date        outTime;
+    private boolean     isRecurring;
 
     public void setRecurring(boolean recurring) {
         this.isRecurring = recurring;

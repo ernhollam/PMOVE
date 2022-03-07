@@ -28,10 +28,11 @@ public class ParkingService {
         this.ticketDAO = ticketDAO;
     }
 
-    public void processIncomingVehicle() throws Exception {
+    public void processIncomingVehicle() {
         try {
             ParkingSpot parkingSpot = getNextParkingNumberIfAvailable();
-            if (parkingSpot != null && parkingSpot.getId() > 0) {
+            // parkingSpot.getId() could never be <=0 due to the fact that if parkingSpot is not null, it would mean the parkingNumber is never reassigned
+            if (parkingSpot != null) {
                 String vehicleRegNumber = getVehicleRegNumber();
                 parkingSpot.setAvailable(false);
                 parkingSpotDAO.updateParking(parkingSpot);//allot this parking space and mark its availability as false
@@ -59,7 +60,7 @@ public class ParkingService {
         }
     }
 
-    private String getVehicleRegNumber() throws Exception {
+    private String getVehicleRegNumber() {
         System.out.println("Please type the vehicle registration number and press enter key");
         return inputReaderUtil.readVehicleRegistrationNumber();
     }
