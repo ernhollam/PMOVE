@@ -8,40 +8,39 @@ import com.parkit.parkingsystem.model.Ticket;
 import com.parkit.parkingsystem.service.ParkingService;
 import com.parkit.parkingsystem.util.InputReaderUtil;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ParkingServiceTest {
 
     private static ParkingService parkingService;
-
     @Mock
     private static InputReaderUtil inputReaderUtil;
     @Mock
-    private static ParkingSpotDAO parkingSpotDAO;
+    private static ParkingSpotDAO  parkingSpotDAO;
     @Mock
-    private static TicketDAO ticketDAO;
+    private static TicketDAO       ticketDAO;
+
+    private        Ticket         ticket;
 
     @BeforeEach
     private void setUpPerTest() {
         try {
             lenient().when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn("ABCDEF");
 
-            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR,false);
-            Ticket ticket = new Ticket();
-            ticket.setInTime(new Date(System.currentTimeMillis() - (60*60*1000)));
+            ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+            ticket = new Ticket();
+            ticket.setInTime(LocalDateTime.now().minusHours(1));
             ticket.setParkingSpot(parkingSpot);
             ticket.setVehicleRegNumber("ABCDEF");
             lenient().when(ticketDAO.getTicket("ABCDEF")).thenReturn(ticket);
@@ -52,18 +51,18 @@ public class ParkingServiceTest {
             parkingService = new ParkingService(inputReaderUtil, parkingSpotDAO, ticketDAO);
         } catch (Exception e) {
             e.printStackTrace();
-            throw  new RuntimeException("Failed to set up test mock objects");
+            throw new RuntimeException("Failed to set up test mock objects");
         }
     }
 
     @Test
-    public void processExitingVehicleTest(){
+    public void processExitingVehicleTest() {
         parkingService.processExitingVehicle();
         verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
     }
 
     @Test
-    public void processExitingVehicleWhenTicketNotUpToDate(){
+    public void processExitingVehicleWhenTicketNotUpToDate() {
         //GIVEN
         when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(false);
         //WHEN
@@ -75,7 +74,6 @@ public class ParkingServiceTest {
     @Test
     public void processExitingVehicleWithNoVehicleRegistrationNumber() throws Exception {
         //GIVEN
-        Ticket ticket = new Ticket();
         when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(null);
         //WHEN
         parkingService.processExitingVehicle();
@@ -84,18 +82,20 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void checkIfRecurringUserIsDetectedWhenUserIsRecurring(){
+    public void checkIfRecurringUserIsDetectedWhenUserIsRecurring() throws Exception {
         //GIVEN: a recurring vehicle entering the parking
-        Ticket ticket = new Ticket();
-        ticket.setVehicleRegNumber("ABCDEF");
+        ticket.setOutTime(LocalDateTime.now());
+
+        Ticket ticket1 = new Ticket();
+        ticket1.setVehicleRegNumber("ABCDEF");
         //WHEN:
-        parkingService.checkIfRecurring(ticket);
+        parkingService.checkIfRecurring(ticket1);
         //THEN: isRecurring must be true
-        assertThat(ticket.isRecurring()).isTrue();
+        assertThat(ticket1.isRecurring()).isTrue();
     }
 
     @Test
-    public void checkIfRecurringUserIsDetectedWhenUserIsNotRecurring(){
+    public void checkIfRecurringUserIsDetectedWhenUserIsNotRecurring() {
         //GIVEN: a vehicle unknown to the DB enters the parking
         Ticket ticket = new Ticket();
         ticket.setVehicleRegNumber("GHIJKL");
@@ -108,7 +108,7 @@ public class ParkingServiceTest {
 
 
     @Test
-    public void getNextParkingNumberIfAvailableWhenAvailableForCar(){
+    public void getNextParkingNumberIfAvailableWhenAvailableForCar() {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(1);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(2);
@@ -122,7 +122,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void getNextParkingNumberIfAvailableWhenAvailableForBike(){
+    public void getNextParkingNumberIfAvailableWhenAvailableForBike() {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(4);
@@ -136,7 +136,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void getNextParkingNumberIfAvailableWhenNotAvailable(){
+    public void getNextParkingNumberIfAvailableWhenNotAvailable() {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(2);
         when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(0);
@@ -147,7 +147,7 @@ public class ParkingServiceTest {
     }
 
     @Test
-    public void getNextParkingNumberIfAvailableWithWrongVehicleType(){
+    public void getNextParkingNumberIfAvailableWithWrongVehicleType() {
         //GIVEN
         when(inputReaderUtil.readSelection()).thenReturn(100);
         //WHEN

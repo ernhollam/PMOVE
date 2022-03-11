@@ -12,11 +12,27 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * <b> Accesses database for parking spot information.</b>
+ * <br>
+ *
+ * @author Tek
+ * <br><br>
+ * @see com.parkit.parkingsystem.service.InteractiveShell
+ * @see com.parkit.parkingsystem.service.ParkingService
+ */
 public class ParkingSpotDAO {
     private static final Logger logger = LogManager.getLogger("ParkingSpotDAO");
 
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
+    /**
+     * Gets next available parking spot for specified parking type.
+     *
+     * @param parkingType Parking type, either BIKE or CAR
+     *
+     * @return ID for next available slot for parking type
+     */
     public int getNextAvailableSlot(ParkingType parkingType) {
         Connection con    = null;
         int        result = -1;
@@ -43,6 +59,13 @@ public class ParkingSpotDAO {
         return result;
     }
 
+    /**
+     * Updates parking spot availability.
+     *
+     * @param parkingSpot Parking spot in database
+     *
+     * @return true if the update was successful, false otherwise
+     */
     public boolean updateParking(ParkingSpot parkingSpot) {
         //update the availability fo that parking slot
         Connection con = null;
