@@ -70,9 +70,7 @@ public class ParkingService {
                 //ticket.setId(ticketID);
                 ticket.setParkingSpot(parkingSpot);
                 ticket.setVehicleRegNumber(vehicleRegNumber);
-                if (checkIfRecurring(ticket)) {
-                    System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount");
-                } //Check if this vehicle is a recurring user
+                checkIfRecurring(ticket);
                 ticket.setPrice(BigDecimal.valueOf(0));
                 ticket.setInTime(inTime);
                 ticket.setOutTime(null);
@@ -165,14 +163,12 @@ public class ParkingService {
      *
      * @param ticket Ticket with information about recurring vehicle or not
      *
-     * @return true or false
      */
-    public boolean checkIfRecurring(Ticket ticket) {
+    public void checkIfRecurring(Ticket ticket) {
         if (ticketDAO.getTicket(ticket.getVehicleRegNumber()) != null) {
             // The vehicle must have entered and exited the parking at least once
             ticket.setRecurring(true);
-            return true;
+            System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount");
         }
-        return false;
     }
 }
